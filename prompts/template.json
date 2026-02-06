@@ -1,0 +1,18 @@
+{
+    "name": null,
+    "input_variables": [
+        "length",
+        "paper",
+        "question",
+        "style"
+    ],
+    "optional_variables": [],
+    "output_parser": null,
+    "partial_variables": {},
+    "metadata": null,
+    "tags": null,
+    "template": "\nYou are an expert research assistant.\n\nResearch Paper: {paper}\nExplanation Style: {style}\nExplanation Length: {length}\n\nUser Question / Focus:\n{question}\n\nProvide a clear, well-structured explanation accordingly.\n",
+    "template_format": "f-string",
+    "validate_template": false,
+    "_type": "prompt"
+}

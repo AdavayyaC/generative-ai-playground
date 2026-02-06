@@ -9,12 +9,12 @@ openai
 # Anthropic Integration
 langchain-anthropic
 
-#  langchain groq
-langchain-groq
-
 # Google Gemini (PaLM) Integration
 langchain-google-genai
 google-generativeai
+
+#  langchain groq
+langchain-groq
 
 # Hugging Face Integration
 langchain-huggingface
@@ -27,3 +27,7 @@ python-dotenv
 # Machine Learning Utilities
 numpy
 scikit-learn
+
+
+# streamlit
+streamlit
