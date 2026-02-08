@@ -1,7 +1,7 @@
 # LangChain Core
 langchain
 langchain-core
-
+ 
 # OpenAI Integration
 langchain-openai
 openai
@@ -31,3 +31,7 @@ scikit-learn
 
 # streamlit
 streamlit
+
+
+# grandalf to draw graphs
+ grandalf
