@@ -2,6 +2,8 @@
 langchain
 langchain-core
  
+# langchain community
+
 # OpenAI Integration
 langchain-openai
 openai
@@ -15,6 +17,11 @@ google-generativeai
 
 #  langchain groq
 langchain-groq
+
+
+
+
+
 
 # Hugging Face Integration
 langchain-huggingface
@@ -34,4 +41,4 @@ streamlit
 
 
 # grandalf to draw graphs
- grandalf
+grandalf

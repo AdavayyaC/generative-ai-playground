@@ -13,7 +13,8 @@ prompt = PromptTemplate(
 
 # model defintion
 model = ChatGroq(
-   model="llama-3.1-8b-instant" 
+   model="llama-3.1-8b-instant",
+   temperature=0.1
 )
 
 # parser
@@ -22,10 +23,10 @@ parser = StrOutputParser()
 # LangChain Expression Language = LCEL
 chain = prompt | model | parser 
 
-result = chain.invoke({'topic':'cricket'})
+result = chain.invoke({'topic':'write a kannada poem for Malikjaan \n '})
 
 print(result)
 
 
 # now inside chain : it will give you nodes how dereicte 
-chain.get_graph().print_ascii()
+# chain.get_graph().print_ascii()
