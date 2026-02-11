@@ -3,6 +3,9 @@ langchain
 langchain-core
  
 # langchain community
+# langchain text splitter
+langchain-text-splitters
+
 
 # OpenAI Integration
 langchain-openai
