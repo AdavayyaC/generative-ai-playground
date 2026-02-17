@@ -4,9 +4,10 @@ langchain-core
  
 # langchain community
 # langchain text splitter
+langchain-community
 langchain-text-splitters
-
-
+faiss-cpu
+ 
 # OpenAI Integration
 langchain-openai
 openai
