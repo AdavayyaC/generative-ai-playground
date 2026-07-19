@@ -34,7 +34,7 @@ This repository includes practical examples for:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/generative-ai-playground.git
+git clone https://github.com/AdavayyaC/generative-ai-playground.git
 cd generative-ai-playground
 ```
 
