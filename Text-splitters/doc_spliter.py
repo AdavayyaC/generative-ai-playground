@@ -32,6 +32,7 @@ class CharacterTextSplitter(TextSplitter):
 
 
 splitter = RecursiveCharacterTextSplitter.from_language(
+    
     language=Language.PYTHON,
     chunk_size=400,
     chunk_overlap=0,
