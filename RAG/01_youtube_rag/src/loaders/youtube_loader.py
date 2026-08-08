@@ -20,5 +20,13 @@ def load_transcript(video_url: str) -> str:
     # In v1.0+, fetch() returns a FetchedTranscript object
     # Each snippet has a .text attribute instead of ["text"]
     text = " ".join(snippet.text for snippet in transcript.snippets)
+    
 
     return text
+
+
+def save_transcript(text: str, file_path: str):
+    """Save transcript to a text file."""
+
+    with open(file_path, "w", encoding="utf-8") as file:
+        file.write(text)

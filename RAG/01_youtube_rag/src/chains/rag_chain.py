@@ -6,7 +6,7 @@ from langchain_groq import ChatGroq
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
-from prompts.rag_prompt import prompt
+from src.prompts.rag_prompt import prompt
 
 
 load_dotenv()
