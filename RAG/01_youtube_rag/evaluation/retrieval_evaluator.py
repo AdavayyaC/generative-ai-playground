@@ -24,87 +24,171 @@ def cosine_similarity(vector1, vector2):
     
     return dot_product / (magnitude1 * magnitude2)
 
-# Hit@K
-def hit_at_k(documents, relevant_text, k):
+def evaluate_k(rag, k):
+    """
+    Evaluate retrieval quality for a particular K.
+    """
 
-    top_documents = documents[:k]
+    print("\n" + "=" * 70)
+    print(f"RETRIEVAL EVALUATION — K = {k}")
+    print("=" * 70)
 
-    for document in top_documents:
+    hit_at_1 = 0
+    hit_at_k = 0
 
-        if relevant_text.lower() in document.page_content.lower():
-            return 1
+    all_scores = []
 
-    return 0
+    for item in evaluation_data:
 
+        question = item["question"]
 
+        print("\n" + "-" * 60)
+        print(f"Question: {question}")
 
-rag = RAGApplication()
-
-print("\nRetrieval Evaluation Started\n")
-
-
-for item in evaluation_data:
-
-    question = item["question"]
-    relevant_text = item["relevant_text"]
-
-    print("=" * 60)
-    print("Question:")
-    print(question)
-
-    # retrieved documents
-    documents = rag.retrieve(question)
-
-    # Convert question into embedding
-    question_embedding = rag.embeddings.embed_query(
-        question
-    )
-
-    print("\nRetrieved Documents:\n")
-
-    scores = []
-
-    for i, document in enumerate(documents):
-
-        document_embedding = rag.embeddings.embed_query(
-            document.page_content
+        # Retrieve more documents temporarily.
+        # We will take only the first K.
+        documents = rag.vector_store.similarity_search(
+            question,
+            k=k
         )
 
-        score = cosine_similarity(
-            question_embedding,
-            document_embedding
+        question_embedding = rag.embeddings.embed_query(
+            question
         )
 
-        scores.append(score)
+        scores = []
 
-        print(f"Document {i + 1}")
-        print(f"Similarity Score: {score:.4f}")
-        print(f"Content: {document.page_content[:200]}...")
-        print()
+        print("\nRetrieved Documents:")
 
-    # Simliraity score
-    if scores:
-        average_score = sum(scores) / len(scores)
-        best_score = max(scores)
+        for i, document in enumerate(documents):
 
-        print(f"Best Score: {best_score:.4f}")
-        print(f"Average Score: {average_score:.4f}")
-        
-    # Standard retrieval metric
+            document_embedding = rag.embeddings.embed_query(
+                document.page_content
+            )
 
-    hit_1 = hit_at_k(
-        documents,
-        relevant_text,
-        k=1
+            score = cosine_similarity(
+                question_embedding,
+                document_embedding
+            )
+
+            scores.append(score)
+            all_scores.append(score)
+
+            print(
+                f"Document {i + 1} | "
+                f"Score: {score:.4f}"
+            )
+
+        # ------------------------------------------------
+        # Hit@1
+        # ------------------------------------------------
+        #
+        # For our current dataset, we use the ground-truth
+        # answer terms to identify whether a relevant chunk
+        # appears.
+        #
+        # This is a simple evaluation for learning purposes.
+        # Later we can make this more rigorous.
+        #
+        ground_truth = item["ground_truth"].lower()
+
+        relevant_found = False
+
+        for document in documents:
+
+            content = document.page_content.lower()
+
+            # Basic semantic/content overlap check
+            ground_truth_words = set(
+                ground_truth.split()
+            )
+
+            content_words = set(
+                content.split()
+            )
+
+            overlap = (
+                len(ground_truth_words & content_words)
+                / max(len(ground_truth_words), 1)
+            )
+
+            if overlap >= 0.15:
+                relevant_found = True
+                break
+
+        if relevant_found:
+            hit_at_k += 1
+
+        # Hit@1
+        if documents:
+
+            first_content = documents[0].page_content.lower()
+
+            ground_truth_words = set(
+                ground_truth.split()
+            )
+
+            first_content_words = set(
+                first_content.split()
+            )
+
+            overlap = (
+                len(
+                    ground_truth_words
+                    & first_content_words
+                )
+                / max(len(ground_truth_words), 1)
+            )
+
+            if overlap >= 0.15:
+                hit_at_1 += 1
+
+    total_questions = len(evaluation_data)
+
+    average_similarity = (
+        sum(all_scores) / len(all_scores)
+        if all_scores
+        else 0
     )
 
-    hit_3 = hit_at_k(
-        documents,
-        relevant_text,
-        k=3
+    print("\n" + "=" * 70)
+    print(f"K = {k} RESULTS")
+    print("=" * 70)
+
+    print(
+        f"Hit@1: "
+        f"{hit_at_1}/{total_questions}"
     )
 
-    print(f"Hit@1: {hit_1}")
-    print(f"Hit@3: {hit_3}")
+    print(
+        f"Hit@{k}: "
+        f"{hit_at_k}/{total_questions}"
+    )
 
-    print()
+    print(
+        f"Average Similarity: "
+        f"{average_similarity:.4f}"
+    )
+
+
+def main():
+
+    print("\nLoading RAG Application...")
+
+    rag = RAGApplication()
+
+    print("\nRAG Application Loaded Successfully!")
+
+    # Test different retrieval sizes
+    k_values = [1, 3, 5, 7]
+
+    for k in k_values:
+
+        evaluate_k(
+            rag,
+            k
+        )
+
+
+if __name__ == "__main__":
+    main()
