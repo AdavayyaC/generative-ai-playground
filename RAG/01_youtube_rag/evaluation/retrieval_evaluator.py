@@ -79,10 +79,8 @@ def evaluate_k(rag, k):
                 f"Score: {score:.4f}"
             )
 
-        # ------------------------------------------------
+
         # Hit@1
-        # ------------------------------------------------
-        #
         # For our current dataset, we use the ground-truth
         # answer terms to identify whether a relevant chunk
         # appears.
