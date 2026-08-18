@@ -27,8 +27,8 @@ HEALTH_TIMEOUT = 3
 # ============================================================
 
 st.set_page_config(
-    page_title="Video Intelligence Desk",
-    page_icon="◧",
+    page_title="YouTubeRAG",
+    page_icon="🟥",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -63,26 +63,26 @@ render(
     );
 
     :root {
-        --bg-void: #0c1210;
-        --bg-panel: #131b18;
-        --bg-raised: #182420;
-        --bg-inset: #0f1613;
+        --bg-void: #0f0f0f;
+        --bg-panel: #212121;
+        --bg-raised: #282828;
+        --bg-inset: #181818;
 
-        --border: #263029;
-        --border-strong: #3a4a41;
+        --border: #3f3f3f;
+        --border-strong: #717171;
 
-        --text-primary: #eef1ea;
-        --text-secondary: #93a099;
-        --text-muted: #5c6961;
+        --text-primary: #f1f1f1;
+        --text-secondary: #aaaaaa;
+        --text-muted: #717171;
 
-        --accent: #c9a227;
-        --accent-strong: #e6bd3a;
-        --accent-soft: rgba(201, 162, 39, 0.14);
+        --accent: #FF0000;
+        --accent-strong: #cc0000;
+        --accent-soft: rgba(255, 0, 0, 0.14);
 
-        --signal: #4a8577;
-        --signal-soft: rgba(74, 133, 119, 0.16);
+        --signal: #3ea6ff;
+        --signal-soft: rgba(62, 166, 255, 0.16);
 
-        --recording: #b8453a;
+        --recording: #FF0000;
 
         --radius-lg: 14px;
         --radius-md: 10px;
@@ -326,29 +326,7 @@ render(
         color: var(--text-secondary);
     }
 
-    [data-testid="stChatMessage"] {
-        background: var(--bg-panel) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: var(--radius-lg) !important;
-        padding: 0.4rem 0.6rem !important;
-        margin-bottom: 0.9rem !important;
-    }
 
-    /* user turns = odd position, assistant turns = even position,
-       since every user message is immediately followed by one
-       assistant reply */
-    [data-testid="stChatMessage"]:nth-of-type(odd) {
-        border-left: 3px solid var(--signal) !important;
-    }
-
-    [data-testid="stChatMessage"]:nth-of-type(even) {
-        border-left: 3px solid var(--accent) !important;
-    }
-
-    [data-testid="stChatMessageAvatarUser"],
-    [data-testid="stChatMessageAvatarCustom"] {
-        background: var(--bg-raised) !important;
-    }
 
     [data-testid="stChatInput"] {
         background: var(--bg-panel);
@@ -668,7 +646,6 @@ def render_user_turn(content: str) -> None:
     with st.chat_message("user"):
         render(
             f"""
-            <div class="msg-tag user">You asked</div>
             <div class="msg-body">{safe_text(content)}</div>
             """
         )
@@ -684,12 +661,6 @@ def render_assistant_turn(msg: Dict[str, Any]) -> None:
         raw_content = re.sub(r'<think>.*?</think>', '', raw_content, flags=re.DOTALL | re.IGNORECASE).strip()
 
     with st.chat_message("assistant"):
-        render(
-            f"""
-            <div class="msg-tag">Transcript Analysis</div>
-            """
-        )
-
         if think_content:
             with st.expander("Thinking Process", expanded=False):
                 st.markdown(think_content)
@@ -753,7 +724,7 @@ render(
             {"LIVE KNOWLEDGE BASE" if video_loaded else "AWAITING FOOTAGE"}
         </div>
         <div class="chyron-title">
-            Video <span>Intelligence</span> Desk
+            Tube<span>RAG</span>
         </div>
         <div class="chyron-subtitle">
             Load a YouTube transcript, then chat with it — grounded,
@@ -818,6 +789,8 @@ with st.sidebar:
             </div>
             """
         )
+        
+        st.video(current_url)
 
         metric_col_1, metric_col_2 = st.columns(2)
 
@@ -1014,7 +987,7 @@ if question_text:
 render(
     """
     <div class="site-footer">
-        Video Intelligence Desk
+        TubeRAG
         · FastAPI
         · FAISS
         · Groq
