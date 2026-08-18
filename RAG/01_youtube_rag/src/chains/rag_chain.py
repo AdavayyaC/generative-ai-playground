@@ -3,34 +3,29 @@ import os
 from dotenv import load_dotenv
 
 from langchain_groq import ChatGroq
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
+from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain_classic.chains import create_retrieval_chain, create_history_aware_retriever
 
-from src.prompts.rag_prompt import prompt
-
+from src.prompts.rag_prompt import history_aware_prompt, qa_prompt
 
 load_dotenv()
-
-
-def format_docs(docs):
-    return "\n\n".join(doc.page_content for doc in docs)
-
 
 def create_rag_chain(retriever):
 
     llm = ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="qwen/qwen3.6-27b",
         temperature=0
     )
 
-    chain = (
-        {
-            "context": retriever | format_docs,
-            "question": RunnablePassthrough(),
-        }
-        | prompt
-        | llm
-        | StrOutputParser()
+    # 1. Create a history-aware retriever
+    history_aware_retriever = create_history_aware_retriever(
+        llm, retriever, history_aware_prompt
     )
 
-    return chain
+    # 2. Create the QA chain
+    question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+
+    # 3. Create the final retrieval chain
+    rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+
+    return rag_chain

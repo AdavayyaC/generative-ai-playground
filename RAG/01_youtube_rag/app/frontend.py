@@ -614,10 +614,14 @@ def ingest_video(url: str) -> Dict[str, Any]:
     return response.json()
 
 
-def ask_question(question: str) -> Dict[str, Any]:
+def ask_question(question: str, chat_history: List[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Send a question to the RAG endpoint."""
 
-    response = requests.post(ASK_ENDPOINT, json={"question": question}, timeout=REQUEST_TIMEOUT)
+    payload = {"question": question}
+    if chat_history:
+        payload["chat_history"] = chat_history
+
+    response = requests.post(ASK_ENDPOINT, json=payload, timeout=REQUEST_TIMEOUT)
     _raise_with_body(response)
     return response.json()
 
@@ -671,11 +675,28 @@ def render_user_turn(content: str) -> None:
 
 
 def render_assistant_turn(msg: Dict[str, Any]) -> None:
+    raw_content = msg.get("content") or ""
+    
+    think_match = re.search(r'<think>(.*?)</think>', raw_content, flags=re.DOTALL | re.IGNORECASE)
+    think_content = None
+    if think_match:
+        think_content = think_match.group(1).strip()
+        raw_content = re.sub(r'<think>.*?</think>', '', raw_content, flags=re.DOTALL | re.IGNORECASE).strip()
+
     with st.chat_message("assistant"):
         render(
             f"""
             <div class="msg-tag">Transcript Analysis</div>
-            <div class="msg-body">{safe_text(msg.get("content"))}</div>
+            """
+        )
+
+        if think_content:
+            with st.expander("Thinking Process", expanded=False):
+                st.markdown(think_content)
+
+        render(
+            f"""
+            <div class="msg-body">{safe_text(raw_content)}</div>
             """
         )
 
@@ -944,7 +965,14 @@ if question_text:
 
         try:
             started_at = time.perf_counter()
-            response = ask_question(question_text)
+            
+            # Extract chat history (excluding the very last user message we just appended)
+            history = [
+                {"role": m["role"], "content": m["content"]} 
+                for m in st.session_state.messages[:-1]
+            ]
+            
+            response = ask_question(question_text, chat_history=history)
             roundtrip = time.perf_counter() - started_at
 
             st.session_state.messages.append(

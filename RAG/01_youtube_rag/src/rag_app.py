@@ -41,18 +41,11 @@ class RAGApplication:
         print("RAG Application Loaded Successfully!\n")
 
     # INGESTION
-    def ingest_documents(self, documents):
+    async def ingest_documents_async(self, documents):
         """
         Replace the current knowledge base with new documents.
-
-        This method is source-independent.
-
-        Documents can come from:
-        - YouTube
-        - PDF
-        - text files
-        - web pages
-        - APIs
+        This is an async wrapper since FAISS operations might block, 
+        but we can run it in a thread or just normally for now.
         """
 
         # Create new vector store
@@ -78,22 +71,10 @@ class RAGApplication:
 
         return len(documents)
 
-    # RETRIEVAL
-    def retrieve(self, question):
-        """
-        Retrieve relevant documents for a question.
-        """
-
-        documents = self.retriever.invoke(
-            question
-        )
-
-        return documents
-
     # ASK
-    def ask(self, question):
+    async def ask_async(self, question: str, chat_history: list = None):
         """
-        Run the complete RAG pipeline.
+        Run the complete RAG pipeline asynchronously.
 
         Returns:
             dict containing:
@@ -102,17 +83,18 @@ class RAGApplication:
             - sources
             - latency
         """
+        
+        if chat_history is None:
+            chat_history = []
 
         start_time = time.perf_counter()
 
-        # Retrieve documents
-        documents = self.retrieve(
-            question
-        )
-
-        # Generate answer
-        answer = self.rag_chain.invoke(
-            question,
+        # Generate answer using async invoke
+        response = await self.rag_chain.ainvoke(
+            {
+                "input": question,
+                "chat_history": chat_history
+            },
             config={
                 "callbacks": [
                     self.langfuse_handler
@@ -126,14 +108,14 @@ class RAGApplication:
         )
 
         end_time = time.perf_counter()
-
         latency = end_time - start_time
+
+        answer = response.get("answer", "")
+        documents = response.get("context", [])
 
         # Prepare sources
         sources = []
-
         for document in documents:
-
             sources.append({
                 "content": document.page_content,
                 "metadata": document.metadata
@@ -145,12 +127,3 @@ class RAGApplication:
             "sources": sources,
             "latency": latency
         }
-
-    # EVALUATION
-    def evaluate(self, question):
-        """
-        Run the RAG application and return
-        evaluation-friendly output.
-        """
-
-        return self.ask(question)
