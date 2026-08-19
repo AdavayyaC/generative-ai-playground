@@ -1,6 +1,7 @@
 import time
 
 from src.embeddings.embedding_model import load_embedding_model
+from src.rerankers.reranker import load_reranker
 from src.vectorstores.faiss_store import (
     load_vector_store,
     create_vector_store,
@@ -19,6 +20,9 @@ class RAGApplication:
 
         # Embedding model
         self.embeddings = load_embedding_model()
+        
+        # Reranker model
+        self.reranker_model = load_reranker()
 
         # Load existing vector store
         self.vector_store = load_vector_store(
@@ -27,7 +31,8 @@ class RAGApplication:
 
         # Create retriever
         self.retriever = get_retriever(
-            self.vector_store
+            self.vector_store,
+            self.reranker_model
         )
 
         # Create RAG chain
@@ -61,7 +66,8 @@ class RAGApplication:
 
         # Rebuild retriever using the new vector store
         self.retriever = get_retriever(
-            self.vector_store
+            self.vector_store,
+            self.reranker_model
         )
 
         # Rebuild RAG chain using the new retriever
