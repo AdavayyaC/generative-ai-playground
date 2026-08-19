@@ -644,11 +644,7 @@ def safe_text(value: Any) -> str:
 
 def render_user_turn(content: str) -> None:
     with st.chat_message("user"):
-        render(
-            f"""
-            <div class="msg-body">{safe_text(content)}</div>
-            """
-        )
+        st.markdown(content)
 
 
 def render_assistant_turn(msg: Dict[str, Any]) -> None:
@@ -665,11 +661,7 @@ def render_assistant_turn(msg: Dict[str, Any]) -> None:
             with st.expander("Thinking Process", expanded=False):
                 st.markdown(think_content)
 
-        render(
-            f"""
-            <div class="msg-body">{safe_text(raw_content)}</div>
-            """
-        )
+        st.markdown(raw_content)
 
         latency = msg.get("latency")
         sources = msg.get("sources") or []

@@ -25,6 +25,22 @@ class CustomContextualCompressionRetriever(BaseRetriever):
         )
         return list(compressed_docs)
 
+    async def _aget_relevant_documents(
+        self, query: str, *, run_manager: CallbackManagerForRetrieverRun
+    ) -> List[Document]:
+        docs = await self.base_retriever.ainvoke(
+            query, config={"callbacks": run_manager.get_child()}
+        )
+        if not docs:
+            return []
+            
+        import asyncio
+        compressed_docs = await asyncio.to_thread(
+            self.base_compressor.compress_documents,
+            docs, query, callbacks=run_manager.get_child()
+        )
+        return list(compressed_docs)
+
 def get_retriever(vector_store, reranker_model=None):
     """
     Create a retriever from the vector store.
@@ -33,7 +49,7 @@ def get_retriever(vector_store, reranker_model=None):
     
     # Base retriever fetches more documents initially
     base_retriever = vector_store.as_retriever(
-        search_kwargs={"k": 10}
+        search_kwargs={"k": 6}
     )
 
     if reranker_model:
